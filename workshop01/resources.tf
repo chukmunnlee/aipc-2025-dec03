@@ -48,7 +48,24 @@ resource "docker_container" "bgg-app" {
    }
    ports {
      internal = 5000
-     external = 8080 + count.index
+   }
+}
+
+resource "docker_container" "nginx" {
+   name = "nginx"
+   image = docker_image.nginx.image_id
+   ports {
+      internal = 80
+      external = 8080
+   }
+   networks_advanced {
+      name = docker_network.bgg-net.name
+   }
+   volumes {
+      // Need absolute path 
+      host_path = abspath(local_file.nginx_conf.filename)
+      container_path = "/etc/nginx/nginx.conf"
+      read_only = true
    }
 }
 
