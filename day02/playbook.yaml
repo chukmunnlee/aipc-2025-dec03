@@ -1,0 +1,29 @@
+- name: Playbook 101
+  hosts: all 
+
+  tasks:
+  - name: Check connectivity 
+    ping:
+  - name: Echo ansbile user
+    debug:
+      msg: "The ansible user is {{ ansible_user }}"
+  - name: create /opt/tmp 
+    file:
+      path: /opt/tmp
+      state: directory
+      mode: '1777'
+  - name: install packages 
+    apt: 
+      update_cache: yes
+      name: unzip 
+      state: present
+  - name: install packages 
+    apt: 
+      update_cache: yes
+      name: nginx 
+      state: present
+  - name: start nginx
+    systemd_service:
+      daemon_reload: yes
+      name: nginx 
+      state: stopped

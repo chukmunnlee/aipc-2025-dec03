@@ -1,0 +1,33 @@
+- name: Install Golang
+  hosts: all 
+  tasks:
+  - name: Check connectivity 
+    ping:
+  - name: check if directory exists
+    stat:
+      path: "{{ golang_dir }}"
+    register: result
+  - name: print result 
+    debug:
+      msg: "{{ result.stat.exists }}"
+  - name: Create directory
+    file:
+      path: "{{ golang_dir }}"
+      state: directory
+      mode: '1777'
+    when: not result.stat.exists
+  - name: Download and install golang to /usr/local/share/lang
+    unarchive:
+      src: https://go.dev/dl/go1.25.5.linux-amd64.tar.gz 
+      dest: "{{ golang_dir }}"
+      remote_src: yes
+    when: not result.stat.exists
+  - name: link go to /usr/local/bin, /usr/local/share/lang/go/bin/go
+    file: 
+      src: "{{ golang_dir }}/go/bin/go"
+      dest: /usr/local/bin/go
+      state: link
+  - name: Generate a PATH file
+    template:
+      src: ./path.j2
+      dest: /root/path.sh

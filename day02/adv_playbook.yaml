@@ -1,0 +1,22 @@
+- name: Playbook 101
+  hosts: all 
+  vars:
+    packages:
+    - name: nginx 
+      to_install: present
+    - name: unzip 
+      to_install: present
+    - name: tmux 
+      to_install: absent
+  tasks:
+  - name: Check connectivity 
+    ping:
+  - name: Update the apt 
+    apt: 
+      update_cache: yes
+
+  - name: Install packages
+    apt: 
+      name: "{{ item.name }}"
+      state: "{{ item.to_install }}"
+    loop: "{{ packages }}"
