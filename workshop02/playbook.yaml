@@ -54,3 +54,31 @@
       daemon_reload: yes
       enabled: yes
       state: restarted
+
+- name: Install Nginx
+  hosts: all
+  tasks: 
+  - name: Step 1 - Install Nginx 
+    apt: 
+      update_cache: yes
+      name: nginx 
+      state: present
+
+  - name: Step 2 - Generate nginx.conf
+    template:
+      src: code-server.conf.j2
+      dest: /etc/nginx/sites-available/code-server.conf
+
+  - name: Step 3 - link to sites-enabled
+    file:
+      src: /etc/nginx/sites-available/code-server.conf
+      dest: /etc/nginx/sites-enabled/code-server.conf
+      state: link
+
+  - name: Step 4 - restart nginx
+    systemd_service:
+      daemon_reload: true 
+      name: nginx 
+      enabled: yes
+      state: restarted
+
