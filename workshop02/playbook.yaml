@@ -1,0 +1,56 @@
+- name: Install Code server
+  hosts: all
+
+  vars:
+    cs_archive: https://github.com/coder/code-server/releases/download/v4.106.3/code-server-4.106.3-linux-amd64.tar.gz
+    cs_root: /usr/local/share
+    cs_dir: code-server-4.106.3-linux-amd64
+    sym_links:
+    - src: "{{ cs_root }}/{{ cs_dir }}"
+      dest: /usr/lib/code-server
+      state: link
+    - src: "{{ cs_root }}/{{ cs_dir }}/bin/code-server"
+      dest: /usr/bin/code-server
+      state: link
+
+  tasks:
+  - name: ping
+    ping:
+
+  - name: check if downloaded
+    stat:
+      path: "{{ cs_root }}/{{ cs_dir }}"
+    register: result
+
+  - name: Step 1 - download and install codeserver archive
+    unarchive:
+      src: "{{ cs_archive }}"
+      dest: "{{ cs_root }}"
+      remote_src: yes
+    register: result
+    when: not result.stat.exists
+
+  - name: Step 2 and 3 - link to /usr/lib/code-server and /usr/bin/code-server
+    file:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      state: "{{ item.state }}"
+    loop: "{{ sym_links }}"
+
+  - name: Step 4 - create directory /var/lib/code-server
+    file:
+      path: /var/lib/code-server
+      state: directory
+      mode: "0755"
+
+  - name: Step 5 - create service file
+    template:
+      src: code-server.service.j2
+      dest: /lib/systemd/system/code-server.service
+
+  - name: Step 6 - reload daemon and restart service
+    systemd_service:
+      name: code-server.service
+      daemon_reload: yes
+      enabled: yes
+      state: restarted
