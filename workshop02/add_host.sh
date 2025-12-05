@@ -1,1 +1,0 @@
-/bin/sh -c 'ssh-keyscan 159.223.32.24 >> ~/.ssh/known_hosts'
